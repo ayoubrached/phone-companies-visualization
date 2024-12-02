@@ -1,52 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import StackedBar from './StackedBar';
-import * as d3 from 'd3';
-import "./App.css"
+import React, { useState } from 'react';
+import StackedBar from './components/StackedBar';
+import FileUploader from './components/FileUploader';
+import './App.css';
 
 const App = () => {
   const [data, setData] = useState([]);
 
-  useEffect(() => {
-    d3.csv('/processed_data_news.csv').then(parsedData => {
-
-      const cleanedData = parsedData.map(d =>
-        Object.fromEntries(
-          Object.entries(d).map(([key, value]) => [key.trim(), value?.trim()])
-        )
-      );
-
-      const groupedData = d3.rollup(
-        cleanedData,
-        v => new Set(v.map(d => d.phone_model)).size,
-        d => d.Year,
-        d => d.phone_brand
-      );
-
-      const allBrands = Array.from(
-        new Set(cleanedData.map(d => d.phone_brand))
-      );
-
-      const years = Array.from(new Set(cleanedData.map(d => d.Year)));
-
-      const formattedData = years.map(year => {
-        const yearData = { year };
-        allBrands.forEach(brand => {
-          const count = groupedData.get(year)?.get(brand) || 0;
-          yearData[brand] = count;
-        });
-        return yearData;
-      });
-
-      setData(formattedData);
-    });
-  }, []);
+  // Handle parsed data from file upload
+  const handleDataParsed = parsedData => {
+    setData(parsedData); // Update the state with parsed data
+  };
 
   return (
-    <div className='graphs'>
+    <div className="graphs">
+      <h1 class="header mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"><span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Phone Company Visualization</span></h1>
+      <FileUploader onDataParsed={handleDataParsed} />
       {data.length > 0 ? (
         <StackedBar data={data} />
       ) : (
-        <p>Loading data...</p>
+        <p class="mb-3 text-black dark:text-black">Please upload a CSV file to generate the visualization.</p>
       )}
     </div>
   );

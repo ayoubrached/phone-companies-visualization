@@ -5,6 +5,8 @@ const StackedBar = ({ data }) => {
   const svgRef = useRef();
 
   useEffect(() => {
+    if (data.length === 0) return;
+
     // Set up dimensions
     const margin = { top: 40, right: 200, bottom: 70, left: 80 };
     const width = 800 - margin.left - margin.right;
@@ -25,13 +27,8 @@ const StackedBar = ({ data }) => {
     const years = data.map(d => d.year);
     const brands = Object.keys(data[0]).filter(key => key !== 'year');
 
-    console.log('Brands:', brands); // Debug
-    console.log('Data:', data); // Debug
-
     // Stack data
     const stackedData = d3.stack().keys(brands)(data);
-
-    console.log('Stacked Data:', stackedData); // Debug
 
     // Set up scales
     const xScale = d3
@@ -48,7 +45,7 @@ const StackedBar = ({ data }) => {
 
     const colorScale = d3
       .scaleOrdinal()
-      .domain(brands) // Ensure it includes all brands
+      .domain(brands)
       .range(d3.schemeCategory10);
 
     // Add axes
@@ -80,6 +77,20 @@ const StackedBar = ({ data }) => {
       .style('font-weight', 'bold')
       .text('Distinct Count of Phone Model');
 
+    // Create a tooltip
+    const tooltip = d3
+      .select('body')
+      .append('div')
+      .style('position', 'absolute')
+      .style('background-color', 'white')
+      .style('border', '1px solid #ddd')
+      .style('padding', '8px')
+      .style('border-radius', '4px')
+      .style('font-size', '12px')
+      .style('box-shadow', '0px 2px 4px rgba(0, 0, 0, 0.2)')
+      .style('pointer-events', 'none')
+      .style('visibility', 'hidden');
+
     // Add stacked bars
     svg
       .selectAll('.layer')
@@ -94,7 +105,27 @@ const StackedBar = ({ data }) => {
       .attr('x', d => xScale(d.data.year))
       .attr('y', d => yScale(d[1]))
       .attr('height', d => yScale(d[0]) - yScale(d[1]))
-      .attr('width', xScale.bandwidth());
+      .attr('width', xScale.bandwidth())
+      .on('mouseover', (event, d) => {
+        const brand = d3.select(event.target.parentNode).datum().key; // Get brand
+        tooltip
+          .html(
+            `<strong>Brand:</strong> ${brand}<br>
+            <strong>Year:</strong> ${d.data.year}<br>
+            <strong>Count:</strong> ${d[1] - d[0]}`
+          )
+          .style('visibility', 'visible')
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY - 30}px`);
+      })
+      .on('mousemove', event => {
+        tooltip
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY - 30}px`);
+      })
+      .on('mouseout', () => {
+        tooltip.style('visibility', 'hidden');
+      });
 
     // Add legend title
     svg
