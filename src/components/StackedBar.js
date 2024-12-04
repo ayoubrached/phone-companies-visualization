@@ -7,10 +7,9 @@ const StackedBar = ({ data }) => {
   useEffect(() => {
     if (data.length === 0) return;
 
-    // Set up dimensions
-    const margin = { top: 40, right: 200, bottom: 70, left: 80 };
-    const width = 800 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
+    const margin = { top: 20, right: 100, bottom: 50, left: 60 };
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
 
     // Clear existing SVG
     d3.select(svgRef.current).selectAll('*').remove();
@@ -52,30 +51,9 @@ const StackedBar = ({ data }) => {
     svg
       .append('g')
       .attr('transform', `translate(0, ${height})`)
-      .call(d3.axisBottom(xScale));
+      .call(d3.axisBottom(xScale).tickSizeOuter(0));
 
     svg.append('g').call(d3.axisLeft(yScale));
-
-    // Add x-axis title
-    svg
-      .append('text')
-      .attr('x', width / 2)
-      .attr('y', height + 50)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '14px')
-      .style('font-weight', 'bold')
-      .text('Year');
-
-    // Add y-axis title
-    svg
-      .append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -height / 2)
-      .attr('y', -50)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '14px')
-      .style('font-weight', 'bold')
-      .text('Distinct Count of Phone Model');
 
     // Create a tooltip
     const tooltip = d3
@@ -91,7 +69,6 @@ const StackedBar = ({ data }) => {
       .style('pointer-events', 'none')
       .style('visibility', 'hidden');
 
-    // Add stacked bars
     svg
       .selectAll('.layer')
       .data(stackedData)
@@ -103,16 +80,16 @@ const StackedBar = ({ data }) => {
       .enter()
       .append('rect')
       .attr('x', d => xScale(d.data.year))
-      .attr('y', d => yScale(d[1]))
-      .attr('height', d => yScale(d[0]) - yScale(d[1]))
+      .attr('y', height)
+      .attr('height', 0)
       .attr('width', xScale.bandwidth())
       .on('mouseover', (event, d) => {
-        const brand = d3.select(event.target.parentNode).datum().key; // Get brand
+        const brand = d3.select(event.target.parentNode).datum().key;
         tooltip
           .html(
             `<strong>Brand:</strong> ${brand}<br>
             <strong>Year:</strong> ${d.data.year}<br>
-            <strong>Count:</strong> ${d[1] - d[0]}`
+            <strong>Value:</strong> ${d[1] - d[0]}`
           )
           .style('visibility', 'visible')
           .style('left', `${event.pageX + 10}px`)
@@ -125,17 +102,22 @@ const StackedBar = ({ data }) => {
       })
       .on('mouseout', () => {
         tooltip.style('visibility', 'hidden');
-      });
+      })
+      .transition()
+      .duration(800)
+      .delay((_, i) => i * 100)
+      .attr('y', d => yScale(d[1]))
+      .attr('height', d => yScale(d[0]) - yScale(d[1]));
 
-    // Add legend title
+    // Add title
     svg
       .append('text')
-      .attr('x', width + 30)
-      .attr('y', 0)
-      .attr('text-anchor', 'start')
-      .style('font-size', '14px')
+      .attr('x', width / 2)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
       .style('font-weight', 'bold')
-      .text('Brand');
+      .text('Phones Produced By Brand');
 
     // Add legend
     const legend = svg
@@ -143,33 +125,23 @@ const StackedBar = ({ data }) => {
       .data(brands)
       .enter()
       .append('g')
-      .attr('transform', (_, i) => `translate(${width + 30}, ${i * 20 + 20})`);
+      .attr('transform', (_, i) => `translate(${width + 10}, ${i * 20})`);
 
     legend
       .append('rect')
       .attr('x', 0)
       .attr('y', 0)
-      .attr('width', 15)
-      .attr('height', 15)
+      .attr('width', 10)
+      .attr('height', 10)
       .attr('fill', d => colorScale(d));
 
     legend
       .append('text')
-      .attr('x', 20)
-      .attr('y', 12)
+      .attr('x', 15)
+      .attr('y', 10)
+      .style('font-size', '10px')
       .text(d => d)
-      .attr('text-anchor', 'start')
-      .style('alignment-baseline', 'middle');
-
-    // Add title
-    svg
-      .append('text')
-      .attr('x', width / 2)
-      .attr('y', -20)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '16px')
-      .style('font-weight', 'bold')
-      .text('Phones Produced By Brand');
+      .attr('text-anchor', 'start');
   }, [data]);
 
   return <svg ref={svgRef}></svg>;

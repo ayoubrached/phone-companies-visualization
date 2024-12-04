@@ -6,22 +6,16 @@ const BarChart = ({ data }) => {
 
   useEffect(() => {
     if (data.length === 0) {
-      console.warn('No data available for rendering BarChart'); // Debugging
+      console.warn('No data available for rendering BarChart');
       return;
     }
 
-    // Check the data structure
-    console.log('Data received by BarChart:', data);
+    const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
 
-    // Set up dimensions
-    const margin = { top: 40, right: 40, bottom: 70, left: 80 };
-    const width = 800 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
-
-    // Clear existing SVG
     d3.select(svgRef.current).selectAll('*').remove();
 
-    // Create SVG container
     const svg = d3
       .select(svgRef.current)
       .attr('width', width + margin.left + margin.right)
@@ -29,11 +23,9 @@ const BarChart = ({ data }) => {
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    // Extract brands and average prices
     const brands = data.map(d => d.phone_brand);
     const avgPrices = data.map(d => d.average_price);
 
-    // Set up scales
     const xScale = d3
       .scaleBand()
       .domain(brands)
@@ -42,7 +34,7 @@ const BarChart = ({ data }) => {
 
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(avgPrices) || 1]) // Set default value if avgPrices is empty
+      .domain([0, d3.max(avgPrices) || 1])
       .nice()
       .range([height, 0]);
 
@@ -51,18 +43,17 @@ const BarChart = ({ data }) => {
       .domain(brands)
       .range(d3.schemeCategory10);
 
-    // Add axes
     svg
       .append('g')
       .attr('transform', `translate(0, ${height})`)
       .call(d3.axisBottom(xScale))
       .selectAll('text')
       .attr('transform', 'rotate(-45)')
-      .style('text-anchor', 'end');
+      .style('text-anchor', 'end')
+      .style('font-size', '10px');
 
-    svg.append('g').call(d3.axisLeft(yScale));
+    svg.append('g').call(d3.axisLeft(yScale).tickSize(-width)).selectAll('text').style('font-size', '10px');
 
-    // Create a tooltip
     const tooltip = d3
       .select('body')
       .append('div')
@@ -71,12 +62,11 @@ const BarChart = ({ data }) => {
       .style('border', '1px solid #ddd')
       .style('padding', '8px')
       .style('border-radius', '4px')
-      .style('font-size', '12px')
+      .style('font-size', '10px')
       .style('box-shadow', '0px 2px 4px rgba(0, 0, 0, 0.2)')
       .style('pointer-events', 'none')
       .style('visibility', 'hidden');
 
-    // Add bars
     svg
       .selectAll('.bar')
       .data(data)
@@ -84,9 +74,9 @@ const BarChart = ({ data }) => {
       .append('rect')
       .attr('class', 'bar')
       .attr('x', d => xScale(d.phone_brand))
-      .attr('y', d => yScale(d.average_price))
+      .attr('y', height)
       .attr('width', xScale.bandwidth())
-      .attr('height', d => height - yScale(d.average_price))
+      .attr('height', 0)
       .attr('fill', d => colorScale(d.phone_brand))
       .on('mouseover', (event, d) => {
         tooltip
@@ -106,15 +96,19 @@ const BarChart = ({ data }) => {
       })
       .on('mouseout', () => {
         tooltip.style('visibility', 'hidden');
-      });
+      })
+      .transition()
+      .duration(800)
+      .delay((_, i) => i * 100)
+      .attr('y', d => yScale(d.average_price))
+      .attr('height', d => height - yScale(d.average_price));
 
-    // Add title
     svg
       .append('text')
       .attr('x', width / 2)
       .attr('y', -10)
       .attr('text-anchor', 'middle')
-      .style('font-size', '16px')
+      .style('font-size', '12px')
       .style('font-weight', 'bold')
       .text('Average Price by Phone Brand');
   }, [data]);

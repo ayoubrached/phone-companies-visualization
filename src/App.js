@@ -20,18 +20,19 @@ const App = () => {
         <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Phone Company Visualization</span>
       </h1>
       <FileUploader onDataParsed={handleDataParsed} />
-      
-      {stackedBarData.length > 0 && (
-        <div className="visualization-section">
-          <h2 className="chart-title mb-4 text-xl font-bold text-gray-900 dark:text-white">Stacked Bar Chart</h2>
-          <StackedBar data={stackedBarData} />
-        </div>
-      )}
 
-      {barChartData.length > 0 && (
+      {stackedBarData.length > 0 && barChartData.length > 0 && (
         <div className="visualization-section">
-          <h2 className="chart-title mb-4 text-xl font-bold text-gray-900 dark:text-white">Bar Chart</h2>
-          <BarChart data={barChartData} />
+          <div className="flex flex-row w-full">
+            <div className="stacked-bar-chart">
+              <h2 className="chart-title mb-2 text-md font-bold text-gray-900 dark:text-black">Stacked Bar Chart</h2>
+              <StackedBar data={stackedBarData} />
+            </div>
+            <div className="bar-chart">
+              <h2 className="chart-title mb-2 text-md font-bold text-gray-900 dark:text-black">Bar Chart</h2>
+              <BarChart data={barChartData} />
+            </div>
+          </div>
         </div>
       )}
     </div>
