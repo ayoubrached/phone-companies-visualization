@@ -12,6 +12,7 @@ const FileUploader = ({ onDataParsed }) => {
       const text = reader.result;
       const parsedData = d3.csvParse(text);
 
+      // Group and calculate distinct phone models per year and brand for Stacked Bar Chart
       const groupedData = d3.rollup(
         parsedData,
         v => new Set(v.map(d => d.phone_model)).size,
@@ -22,7 +23,7 @@ const FileUploader = ({ onDataParsed }) => {
       const allBrands = Array.from(new Set(parsedData.map(d => d.phone_brand)));
       const years = Array.from(new Set(parsedData.map(d => d.Year)));
 
-      const formattedData = years.map(year => {
+      const formattedDataForStackedBar = years.map(year => {
         const yearData = { year };
         allBrands.forEach(brand => {
           const count = groupedData.get(year)?.get(brand) || 0;
@@ -31,7 +32,23 @@ const FileUploader = ({ onDataParsed }) => {
         return yearData;
       });
 
-      onDataParsed(formattedData);
+      // Group and calculate average price for each phone brand for Bar Chart
+      const groupedDataForBarChart = d3.rollup(
+        parsedData,
+        v => d3.mean(v, d => +d.price),  // Calculate average price for each brand
+        d => d.phone_brand
+      );
+
+      const formattedDataForBarChart = Array.from(groupedDataForBarChart, ([brand, avgPrice]) => ({
+        phone_brand: brand,
+        average_price: avgPrice
+      })).sort((a, b) => b.average_price - a.average_price);  // Sort in descending order by average price
+
+      // Pass both datasets to parent component
+      onDataParsed({
+        stackedBarData: formattedDataForStackedBar,
+        barChartData: formattedDataForBarChart
+      });
     };
 
     reader.readAsText(file);
@@ -39,8 +56,12 @@ const FileUploader = ({ onDataParsed }) => {
 
   return (
     <div style={{ marginBottom: '20px' }}>
-      <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Default size</label>
-      <input class="block w-full mb-5 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file" onChange={handleFileUpload}/>
+      <input
+        className="block w-full mb-5 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+        id="default_size"
+        type="file"
+        onChange={handleFileUpload}
+      />
     </div>
   );
 };
