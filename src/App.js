@@ -25,11 +25,9 @@ const App = () => {
         <div className="visualization-section">
           <div className="flex flex-row w-full">
             <div className="stacked-bar-chart">
-              <h2 className="chart-title mb-2 text-md font-bold text-gray-900 dark:text-black">Stacked Bar Chart</h2>
               <StackedBar data={stackedBarData} />
             </div>
             <div className="bar-chart">
-              <h2 className="chart-title mb-2 text-md font-bold text-gray-900 dark:text-black">Bar Chart</h2>
               <BarChart data={barChartData} />
             </div>
           </div>
