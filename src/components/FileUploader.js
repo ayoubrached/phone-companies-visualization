@@ -2,7 +2,7 @@ import React from 'react';
 import * as d3 from 'd3';
 
 const FileUploader = ({ onDataParsed }) => {
-  const handleFileUpload = event => {
+  const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -15,17 +15,17 @@ const FileUploader = ({ onDataParsed }) => {
       // Group and calculate distinct phone models per year and brand for Stacked Bar Chart
       const groupedData = d3.rollup(
         parsedData,
-        v => new Set(v.map(d => d.phone_model)).size,
-        d => d.Year,
-        d => d.phone_brand
+        (v) => new Set(v.map((d) => d.phone_model)).size,
+        (d) => d.Year,
+        (d) => d.phone_brand
       );
 
-      const allBrands = Array.from(new Set(parsedData.map(d => d.phone_brand)));
-      const years = Array.from(new Set(parsedData.map(d => d.Year)));
+      const allBrands = Array.from(new Set(parsedData.map((d) => d.phone_brand)));
+      const years = Array.from(new Set(parsedData.map((d) => d.Year)));
 
-      const formattedDataForStackedBar = years.map(year => {
+      const formattedDataForStackedBar = years.map((year) => {
         const yearData = { year };
-        allBrands.forEach(brand => {
+        allBrands.forEach((brand) => {
           const count = groupedData.get(year)?.get(brand) || 0;
           yearData[brand] = count;
         });
@@ -35,19 +35,67 @@ const FileUploader = ({ onDataParsed }) => {
       // Group and calculate average price for each phone brand for Bar Chart
       const groupedDataForBarChart = d3.rollup(
         parsedData,
-        v => d3.mean(v, d => +d.price),  // Calculate average price for each brand
-        d => d.phone_brand
+        (v) => d3.mean(v, (d) => +d.price), // Calculate average price for each brand
+        (d) => d.phone_brand
       );
 
-      const formattedDataForBarChart = Array.from(groupedDataForBarChart, ([brand, avgPrice]) => ({
-        phone_brand: brand,
-        average_price: avgPrice
-      })).sort((a, b) => b.average_price - a.average_price);  // Sort in descending order by average price
+      const formattedDataForBarChart = Array.from(
+        groupedDataForBarChart,
+        ([brand, avgPrice]) => ({
+          phone_brand: brand,
+          average_price: avgPrice,
+        })
+      ).sort((a, b) => b.average_price - a.average_price); // Sort in descending order by average price
 
-      // Pass both datasets to parent component
+      // Function to infer OS based on phone brand
+      const inferOS = (brand) => {
+        const brandToOSMap = {
+          apple: 'iOS',
+          samsung: 'Android',
+          huawei: 'Android',
+          google: 'Android',
+          oneplus: 'Android',
+          xiaomi: 'Android',
+          oppo: 'Android',
+          vivo: 'Android',
+          nokia: 'Android',
+          sony: 'Android',
+          // Add more brand mappings here if needed
+        };
+
+        // Return the mapped OS or "Unknown" if the brand is not in the map
+        return brandToOSMap[brand.toLowerCase()] || 'Unknown';
+      };
+
+      // Infer OS and calculate foldable vs non-foldable devices
+      const groupedDataForFoldable = d3.rollup(
+        parsedData.map(d => ({
+          ...d,
+          os: inferOS(d.phone_brand), // Use the inferOS function to determine the OS
+        })),
+        (v) => ({
+          Yes: v.filter((d) => d.Foldable === '1').length, // Foldable devices
+          No: v.filter((d) => d.Foldable === '0').length, // Non-Foldable devices
+        }),
+        (d) => d.os
+      );
+
+      const formattedDataForFoldable = Array.from(
+        groupedDataForFoldable,
+        ([os, counts]) => ({
+          os: os || 'Unknown', // Default to 'Unknown' if `os` is undefined
+          Yes: counts.Yes || 0,
+          No: counts.No || 0,
+        })
+      );
+
+      console.log("Foldable Data:", formattedDataForFoldable);
+
+      // Pass all datasets to the parent component
       onDataParsed({
         stackedBarData: formattedDataForStackedBar,
-        barChartData: formattedDataForBarChart
+        barChartData: formattedDataForBarChart,
+        foldableData: formattedDataForFoldable, // Pass foldable data here
       });
     };
 
