@@ -105,7 +105,7 @@ const BarChart = ({ data, colorScale }) => {
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
       .style('font-weight', 'bold')
-      .text('Average Price by Phone Brand');
+      .text('Average Price by Phone Brand (USD)');
 
     svg
       .append('text')
