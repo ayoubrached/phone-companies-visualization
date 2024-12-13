@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const PixelsVsAvgPriceScatterPlot = ({ data }) => {
+const PixelsVsAvgPriceScatterPlot = ({ data, colorScale }) => {
     const svgRef = useRef();
 
     useEffect(() => {
@@ -37,11 +37,6 @@ const PixelsVsAvgPriceScatterPlot = ({ data }) => {
             .domain([0, d3.max(data, d => d.avgPriceUSD) || 1])
             .nice()
             .range([height, 0]);
-
-        const colorScale = d3
-            .scaleOrdinal()
-            .domain(data.map(d => d.phoneBrand))
-            .range(d3.schemeCategory10);
 
         svg
             .append('g')
@@ -126,7 +121,7 @@ const PixelsVsAvgPriceScatterPlot = ({ data }) => {
             .attr('text-anchor', 'middle')
             .style('font-size', '12px')
             .text('Average Price (USD)');
-    }, [data]);
+    }, [data, colorScale]);
 
     return <svg ref={svgRef}></svg>;
 };
