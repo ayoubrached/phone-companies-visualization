@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import StackedBar from './components/StackedBar';
 import BarChart from './components/BarChart';
+import Foldable from './components/Foldable'; // Import the Foldable component
 import FileUploader from './components/FileUploader';
 import PixelsVsAvgPriceScatterPlot from './components/PixelsVsAvgPriceScatterPlot';
 import './App.css';
@@ -10,6 +11,7 @@ const App = () => {
     const [stackedBarData, setStackedBarData] = useState([]);
     const [barChartData, setBarChartData] = useState([]);
     const [scatterPlotData, setScatterPlotData] = useState([]);
+    const [foldableData, setFoldableData] = useState([]);
     const [brands, setBrands] = useState([]);
 
     const colorScale = useMemo(() => {
@@ -19,12 +21,15 @@ const App = () => {
             .range(d3.schemeCategory10);
     }, [brands]);
 
-    const handleDataParsed = ({ stackedBarData, barChartData, scatterPlotData, uniqueBrands }) => {
+    // Handle parsed data from file upload
+    const handleDataParsed = ({ stackedBarData, barChartData, scatterPlotData, foldableData, uniqueBrands }) => {
         setStackedBarData(stackedBarData || []);
         setBarChartData(barChartData || []);
         setScatterPlotData(scatterPlotData || []);
+        setFoldableData(foldableData || []);
         setBrands([...new Set(uniqueBrands)]); // Ensure unique and sorted
     };
+
     console.log('Brands:', brands);
     console.log('Color Scale Domain:', colorScale.domain());
 
@@ -37,7 +42,7 @@ const App = () => {
             </h1>
             <FileUploader onDataParsed={handleDataParsed} />
 
-            {stackedBarData.length > 0 && barChartData.length > 0 && scatterPlotData.length > 0 && (
+            {stackedBarData.length > 0 && barChartData.length > 0 && scatterPlotData.length > 0 && foldableData.length > 0 && (
                 <div className="visualization-section">
                     <div className="flex flex-row w-full">
                         <div className="stacked-bar-chart flex-1">
@@ -45,6 +50,9 @@ const App = () => {
                         </div>
                         <div className="bar-chart flex-1">
                             <BarChart data={barChartData} colorScale={colorScale} />
+                        </div>
+                        <div className="foldable-chart flex-1">
+                            <Foldable data={foldableData} colorScale={colorScale} />
                         </div>
                     </div>
 
@@ -55,7 +63,6 @@ const App = () => {
             )}
         </div>
     );
-    
 };
 
 export default App;
