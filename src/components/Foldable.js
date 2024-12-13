@@ -57,6 +57,24 @@ const Foldable = ({ data }) => {
       .attr('transform', 'rotate(-30)')
       .style('text-anchor', 'end');
 
+    svg
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', 'bold')
+      .text('Foldable vs Non-Foldable');
+
+    svg
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -height / 2)
+      .attr('y', -40)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Number of Phones');
+
     svg.append('g').call(d3.axisLeft(yScale));
 
     // Tooltip

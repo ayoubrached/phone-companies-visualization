@@ -137,7 +137,7 @@ const StackedBar = ({ data, colorScale }) => {
       .data(brands)
       .enter()
       .append('g')
-      .attr('transform', (_, i) => `translate(${width + 30}, ${i * 20})`);
+      .attr('transform', (_, i) => `translate(${width + 20}, ${i * 20})`);
 
     legend
       .append('rect')

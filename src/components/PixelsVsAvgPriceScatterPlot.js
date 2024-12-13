@@ -121,6 +121,7 @@ const PixelsVsAvgPriceScatterPlot = ({ data, colorScale }) => {
             .attr('text-anchor', 'middle')
             .style('font-size', '12px')
             .text('Average Price (USD)');
+
     }, [data, colorScale]);
 
     return <svg ref={svgRef}></svg>;

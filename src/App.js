@@ -44,21 +44,21 @@ const App = () => {
 
             {stackedBarData.length > 0 && barChartData.length > 0 && scatterPlotData.length > 0 && foldableData.length > 0 && (
                 <div className="visualization-section">
-                    <div className="flex flex-row w-full">
-                        <div className="stacked-bar-chart flex-1">
+                    <div className="flex flex-row w-full flex-wrap">
+                        <div className="stacked-bar-chart flex-1 mb-10">
                             <StackedBar data={stackedBarData} colorScale={colorScale} />
                         </div>
                         <div className="bar-chart flex-1">
                             <BarChart data={barChartData} colorScale={colorScale} />
                         </div>
+                        <div className="scatter-plot flex-1">
+                            <PixelsVsAvgPriceScatterPlot data={scatterPlotData} colorScale={colorScale} />
+                        </div>
                         <div className="foldable-chart flex-1">
                             <Foldable data={foldableData} colorScale={colorScale} />
                         </div>
                     </div>
-
-                    <div className="scatter-plot mt-5">
-                        <PixelsVsAvgPriceScatterPlot data={scatterPlotData} colorScale={colorScale} />
-                    </div>
+                    
                 </div>
             )}
         </div>
