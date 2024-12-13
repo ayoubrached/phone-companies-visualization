@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const StackedBar = ({ data }) => {
+const StackedBar = ({ data, colorScale }) => {
   const svgRef = useRef();
 
   useEffect(() => {
     if (data.length === 0) return;
 
     const margin = { top: 20, right: 100, bottom: 50, left: 60 };
-    const width = 600 - margin.left - margin.right;
+    const width = 700 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
     // Clear existing SVG
@@ -41,11 +41,6 @@ const StackedBar = ({ data }) => {
       .domain([0, d3.max(stackedData, d => d3.max(d, d => d[1]))])
       .nice()
       .range([height, 0]);
-
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(brands)
-      .range(d3.schemeCategory10);
 
     // Add axes
     svg
@@ -118,6 +113,23 @@ const StackedBar = ({ data }) => {
       .style('font-size', '12px')
       .style('font-weight', 'bold')
       .text('Phones Produced By Brand');
+    
+    svg
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -height / 2)
+      .attr('y', -40)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Number of Phones Produced');
+    
+    svg
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height + 40)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Year');
 
     // Add legend
     const legend = svg
@@ -125,7 +137,7 @@ const StackedBar = ({ data }) => {
       .data(brands)
       .enter()
       .append('g')
-      .attr('transform', (_, i) => `translate(${width + 10}, ${i * 20})`);
+      .attr('transform', (_, i) => `translate(${width + 30}, ${i * 20})`);
 
     legend
       .append('rect')
@@ -142,7 +154,7 @@ const StackedBar = ({ data }) => {
       .style('font-size', '10px')
       .text(d => d)
       .attr('text-anchor', 'start');
-  }, [data]);
+  }, [data, colorScale]);
 
   return <svg ref={svgRef}></svg>;
 };

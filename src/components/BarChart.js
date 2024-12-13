@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const BarChart = ({ data }) => {
+const BarChart = ({ data, colorScale }) => {
   const svgRef = useRef();
 
   useEffect(() => {
@@ -37,11 +37,6 @@ const BarChart = ({ data }) => {
       .domain([0, d3.max(avgPrices) || 1])
       .nice()
       .range([height, 0]);
-
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(brands)
-      .range(d3.schemeCategory10);
 
     svg
       .append('g')
@@ -111,7 +106,25 @@ const BarChart = ({ data }) => {
       .style('font-size', '12px')
       .style('font-weight', 'bold')
       .text('Average Price by Phone Brand');
-  }, [data]);
+
+    svg
+      .append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -height / 2)
+      .attr('y', -40)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Average Price (USD)');
+    
+    svg
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height + 50)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .text('Brand');
+
+  }, [data, colorScale]);
 
   return <svg ref={svgRef}></svg>;
 };

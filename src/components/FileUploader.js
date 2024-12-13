@@ -60,7 +60,6 @@ const FileUploader = ({ onDataParsed }) => {
           vivo: 'Android',
           nokia: 'Android',
           sony: 'Android',
-          // Add more brand mappings here if needed
         };
 
         // Return the mapped OS or "Unknown" if the brand is not in the map
@@ -89,13 +88,35 @@ const FileUploader = ({ onDataParsed }) => {
         })
       );
 
-      console.log("Foldable Data:", formattedDataForFoldable);
+      // Group and calculate scatter plot data
+      const groupedDataForScatterPlot = d3.rollup(
+        parsedData,
+        (v) => {
+          const avgPixels = d3.mean(v, (d) => {
+            const [width, height] = d.Display_Resolution.split('x').map(Number);
+            return width * height;
+          });
+          const avgPriceUSD = d3.mean(v, (d) => +d.price_USD);
+          return { avgPixels, avgPriceUSD };
+        },
+        (d) => d.phone_brand
+      );
+
+      const formattedDataForScatterPlot = Array.from(
+        groupedDataForScatterPlot,
+        ([brand, { avgPixels, avgPriceUSD }]) => ({
+          phoneBrand: brand,
+          avgPixels,
+          avgPriceUSD,
+        })
+      );
 
       // Pass all datasets to the parent component
       onDataParsed({
         stackedBarData: formattedDataForStackedBar,
         barChartData: formattedDataForBarChart,
         foldableData: formattedDataForFoldable, // Pass foldable data here
+        scatterPlotData: formattedDataForScatterPlot, // Pass scatter plot data here
       });
     };
 
